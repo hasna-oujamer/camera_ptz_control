@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Settings - SNRT Remote Production</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border-color: #30363d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --accent: #00bcd4;
+            --success: #238636;
+            --danger: #da3633;
+        }
+
+        .card-header h3 {
+            color: white;
+        }
+
+        label.form-label {
+            color: white !important;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            color: var(--text-primary);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs .nav-link {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: transparent;
+            color: var(--accent);
+            border-bottom: 3px solid var(--accent);
+        }
+
+        .card {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            background: rgba(0, 188, 212, 0.1);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .form-control, .form-select {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 0.75rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: var(--bg-tertiary);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.2rem rgba(0, 188, 212, 0.25);
+            color: var(--text-primary);
+        }
+
+        .form-select option {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn {
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .btn-primary:hover {
+            background: #00acc1;
+            border-color: #00acc1;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .status-connected {
+            background: rgba(35, 134, 54, 0.2);
+            color: var(--success);
+        }
+
+        .status-disconnected {
+            background: rgba(218, 54, 51, 0.2);
+            color: var(--danger);
+        }
+
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .camera-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .camera-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 188, 212, 0.2);
+        }
+
+        .camera-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .camera-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.5rem 0;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .camera-info:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .refresh-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .refresh-btn:hover {
+            background: #00acc1;
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 188, 212, 0.4);
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .spinner-border {
+            color: var(--accent);
+        }
+
+        /* Style pour cacher le contenu de la grille des caméras */
+        .camera-grid-hidden {
+            opacity: 0.6;
+        }
+
+        /* Animation pour l'apparition du contenu */
+        .camera-grid-visible {
+            opacity: 1;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .camera-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .refresh-btn {
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-video me-2"></i>SNRT Remote Production</a>
+            <div class="ms-auto">
+                <span class="text-light me-3">Bienvenue, {{ session.username }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Navigation Tabs -->
+    <div class="container mt-3">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('ptz_control') }}">
+                    <i class="fas fa-gamepad me-2"></i>PTZ Control
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('camera_settings') }}">
+                    <i class="fas fa-camera me-2"></i>Camera Settings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('studio_settings') }}">
+                    <i class="fas fa-cogs me-2"></i>Studio Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Configuration Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-sliders-h me-2"></i>Configuration des Caméras</h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Studio</label>
+                        <select class="form-select" id="studioSelect" onchange="updateCameras()">
+                            <option value="">-- Sélectionner un studio --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Caméra</label>
+                        <select class="form-select" id="cameraSelect" disabled onchange="updateCameraDisplay()">
+                            <option value="">-- Sélectionner une caméra --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Port COM</label>
+                        <select class="form-select" id="comPort" onchange="updateCameraDisplay()">
+                            <option value="COM1">COM1</option>
+                            <option value="COM2">COM2</option>
+                            <option value="COM3">COM3</option>
+                            <option value="COM4">COM4</option>
+                            <option value="COM5">COM5</option>
+                            <option value="COM6">COM6</option>
+                            <option value="COM7">COM7</option>
+                            <option value="COM8">COM8</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Vitesse de transmission</label>
+                        <select class="form-select" id="baudRate" onchange="updateCameraDisplay()">
+                            <option value="9600" selected>9600 bps</option>
+                            <option value="38400">38400 bps</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="connection-status status-disconnected" id="connectionStatus">
+                            <i class="fas fa-circle"></i>
+                            Caméra déconnectée
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-primary" onclick="connectCamera()">
+                        <i class="fas fa-link me-2"></i>Connecter
+                    </button>
+                    <button class="btn btn-secondary" onclick="disconnectCamera()">
+                        <i class="fas fa-unlink me-2"></i>Déconnecter
+                    </button>
+                    <button class="btn btn-warning" onclick="saveSettings()">
+                        <i class="fas fa-save me-2"></i>Sauvegarder
+                    </button>
+                    <button class="btn btn-info" onclick="refreshStudios()">
+                        <i class="fas fa-sync-alt me-2"></i>Actualiser
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cameras Overview - Toujours visible -->
+        <div class="card" id="cameraOverviewCard">
+            <div class="card-header">
+                <h3><i class="fas fa-video me-2"></i>Vue d'ensemble des Caméras</h3>
+            </div>
+            <div class="card-body">
+                <div class="camera-grid camera-grid-hidden" id="cameraGrid">
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-video fa-3x mb-3"></i>
+                        <p>Sélectionnez un studio pour voir ses caméras</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bouton de rafraîchissement flottant -->
+    <button class="refresh-btn" onclick="refreshStudios()" title="Actualiser les données">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let studiosData = {};
+        let selectedStudio = null;
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStudiosFromAPI();
+        });
+
+        async function loadStudiosFromAPI() {
+            try {
+                const response = await fetch('/api/studios');
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement des studios');
+                }
+
+                studiosData = await response.json();
+                populateStudioSelect();
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                // Fallback vers les données initiales (simulées pour la démo)
+
+
+                populateStudioSelect();
+            }
+        }
+
+        function populateStudioSelect() {
+            const studioSelect = document.getElementById('studioSelect');
+            studioSelect.innerHTML = '<option value="">-- Sélectionner un studio --</option>';
+
+            Object.keys(studiosData).forEach(studioName => {
+                const option = document.createElement('option');
+                option.value = studioName;
+                option.textContent = studioName;
+                studioSelect.appendChild(option);
+            });
+        }
+
+        function updateCameras() {
+            const studioSelect = document.getElementById('studioSelect');
+            const cameraSelect = document.getElementById('cameraSelect');
+            const cameraGrid = document.getElementById('cameraGrid');
+            selectedStudio = studioSelect.value;
+
+            cameraSelect.innerHTML = '<option value="">-- Sélectionner une caméra --</option>';
+
+            if (selectedStudio && studiosData[selectedStudio]) {
+                cameraSelect.disabled = false;
+                const cameras = studiosData[selectedStudio].cameras || {};
+
+                Object.keys(cameras).forEach(cameraName => {
+                    const option = document.createElement('option');
+                    option.value = cameraName;
+                    option.textContent = cameraName;
+                    cameraSelect.appendChild(option);
+                });
+
+                // Afficher le contenu des caméras avec animation
+                cameraGrid.className = 'camera-grid camera-grid-visible';
+                showStudioCameras(selectedStudio);
+            } else {
+                cameraSelect.disabled = true;
+                // Afficher le message par défaut
+                cameraGrid.className = 'camera-grid camera-grid-hidden';
+                cameraGrid.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-video fa-3x mb-3"></i>
+                        <p>Sélectionnez un studio pour voir ses caméras</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Nouvelle fonction pour mettre à jour l'affichage quand on change le port ou le baudrate
+        function updateCameraDisplay() {
+            if (selectedStudio) {
+                showStudioCameras(selectedStudio);
+            }
+        }
+
+        function showStudioCameras(studioName) {
+            const studio = studiosData[studioName];
+            const grid = document.getElementById('cameraGrid');
+            const cameras = studio.cameras || {};
+
+            // Récupérer les valeurs sélectionnées dans les contrôles
+            const selectedComPort = document.getElementById('comPort').value;
+            const selectedBaudRate = document.getElementById('baudRate').value;
+
+            if (Object.keys(cameras).length === 0) {
+                grid.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-video fa-3x mb-3"></i>
+                        <p>Aucune caméra configurée dans le studio "${studioName}"</p>
+                        <a href="{{ url_for('studio_settings') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Ajouter des caméras
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = '';
+            Object.keys(cameras).forEach((cameraName, index) => {
+                const camera = cameras[cameraName];
+
+                const cameraCard = document.createElement('div');
+                cameraCard.className = 'camera-card';
+                cameraCard.innerHTML = `
+                    <div class="camera-name">
+                        <i class="fas fa-video me-2"></i>${cameraName}
+                        <small class="text-muted ms-2">(${studioName})</small>
+                    </div>
+                    <div class="camera-info">
+                        <span class="info-label"><i class="fas fa-network-wired me-1"></i>Adresse IP</span>
+                        <span class="info-value">${camera.ip || 'Non configurée'}</span>
+                    </div>
+                    <div class="camera-info">
+                        <span class="info-label"><i class="fas fa-plug me-1"></i>Port COM (Sélectionné)</span>
+                        <span class="info-value" style="color: var(--accent); font-weight: bold;">${selectedComPort}</span>
+                    </div>
+
+                    <div class="camera-info">
+                        <span class="info-label"><i class="fas fa-tachometer-alt me-1"></i>Baudrate (Sélectionné)</span>
+                        <span class="info-value" style="color: var(--accent); font-weight: bold;">${selectedBaudRate} bps</span>
+                    </div>
+                    <div class="camera-info">
+                        <span class="info-label"><i class="fas fa-tag me-1"></i>Modèle</span>
+                        <span class="info-value">${camera.model || 'Non spécifié'}</span>
+                    </div>
+                `;
+                grid.appendChild(cameraCard);
+            });
+        }
+
+        async function refreshStudios() {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            const originalIcon = refreshBtn.innerHTML;
+
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            refreshBtn.disabled = true;
+
+            try {
+                await loadStudiosFromAPI();
+
+                // Animation de succès
+                refreshBtn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => {
+                    refreshBtn.innerHTML = originalIcon;
+                    refreshBtn.disabled = false;
+                }, 1000);
+
+            } catch (error) {
+                console.error('Erreur lors du rafraîchissement:', error);
+                refreshBtn.innerHTML = '<i class="fas fa-exclamation"></i>';
+                setTimeout(() => {
+                    refreshBtn.innerHTML = originalIcon;
+                    refreshBtn.disabled = false;
+                }, 2000);
+            }
+        }
+
+        function connectCamera() {
+            const studio = document.getElementById('studioSelect').value;
+            const camera = document.getElementById('cameraSelect').value;
+           // const port = document.getElementById('comPort').value;
+            const baudrate = document.getElementById('baudRate').value;
+
+            if (!studio || !camera) {
+                alert('Veuillez sélectionner un studio et une caméra');
+                return;
+            }
+
+            fetch('/connect', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({port, baudrate: parseInt(baudrate)})
+            })
+            .then(response => response.json())
+            .then(data => {
+                const status = document.getElementById('connectionStatus');
+                if (data.success) {
+                    status.className = 'connection-status status-connected';
+                    status.innerHTML = '<i class="fas fa-circle"></i> Caméra connectée';
+                } else {
+                    status.className = 'connection-status status-disconnected';
+                    status.innerHTML = '<i class="fas fa-circle"></i> Échec de connexion';
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                const status = document.getElementById('connectionStatus');
+                status.className = 'connection-status status-disconnected';
+                status.innerHTML = '<i class="fas fa-circle"></i> Erreur de connexion';
+            });
+        }
+
+        function disconnectCamera() {
+            fetch('/disconnect', {method: 'POST'})
+            .then(response => response.json())
+            .then(data => {
+                const status = document.getElementById('connectionStatus');
+                status.className = 'connection-status status-disconnected';
+                status.innerHTML = '<i class="fas fa-circle"></i> Caméra déconnectée';
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+            });
+        }
+
+        function saveSettings() {
+            const studio = document.getElementById('studioSelect').value;
+            const camera = document.getElementById('cameraSelect').value;
+            const port = document.getElementById('comPort').value;
+            const baudrate = document.getElementById('baudRate').value;
+
+            if (!studio || !camera) {
+                alert('Veuillez sélectionner un studio et une caméra');
+                return;
+            }
+
+            // Ici, vous pourrez implémenter la sauvegarde des paramètres
+            // dans votre base de données ou fichier de configuration
+            alert(`Paramètres sauvegardés:\nStudio: ${studio}\nCaméra: ${camera}\nPort COM: ${port}\nBaudrate: ${baudrate}`);
+        }
+
+        // Rafraîchissement automatique toutes les 30 secondes
+        setInterval(refreshStudios, 30000);
+    </script>
+</body>
+</html>

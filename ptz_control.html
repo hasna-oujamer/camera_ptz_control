@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PTZ Control - SNRT Remote Production</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+    :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border-color: #30363d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --accent: #00bcd4;
+            --success: #238636;
+            --danger: #da3633;
+            --warning: #d29922;
+        }
+
+   body {
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            color: var(--text-primary);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs .nav-link {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: transparent;
+            color: var(--accent);
+            border-bottom: 3px solid var(--accent);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        .main-container {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .status-box {
+            background: rgba(0, 188, 212, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            width: 100%;
+        }
+
+        .connection-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            background: #00acc1;
+            border-color: #00acc1;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .disconnect-btn {
+            background: var(--danger) !important;
+            border-color: var(--danger) !important;
+        }
+
+        .disconnect-btn:hover {
+            background: #c62828 !important;
+            border-color: #c62828 !important;
+        }
+
+        .ptz-section {
+            text-align: center;
+            width: 100%;
+        }
+
+        .section-title {
+            text-align: center;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .ptz-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 80px);
+            grid-gap: 15px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .circle-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-primary);
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .circle-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 50%;
+        }
+
+        .circle-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            border-color: var(--accent);
+            box-shadow: 0 8px 25px rgba(0, 188, 212, 0.3);
+            color: white;
+        }
+
+        .circle-btn:hover::before {
+            opacity: 1;
+        }
+
+        .circle-btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .stop-btn {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .stop-btn:hover {
+            border-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 8px 25px rgba(218, 54, 51, 0.4);
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .zoom-btn {
+            width: 100px;
+            height: 60px;
+            border-radius: 15px;
+            background: var(--bg-tertiary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .zoom-btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 6px 20px rgba(0, 188, 212, 0.3);
+        }
+
+        .status {
+            margin-top: 1rem;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .connected {
+            background: rgba(35, 134, 54, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .disconnected {
+            background: rgba(218, 54, 51, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        #log {
+            margin-top: 2rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            width: 100%;
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry {
+            margin: 0.5rem 0;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-success {
+            color: var(--success);
+        }
+
+        .log-error {
+            color: var(--danger);
+        }
+
+        /* Scrollbar personnalisée */
+        #log::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #log::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        #log::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        #log::-webkit-scrollbar-thumb:hover {
+            background: #00acc1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+                align-items: flex-start;
+            }
+
+            .main-container {
+                padding: 1.5rem;
+                margin-top: 1rem;
+            }
+
+            .ptz-grid {
+                grid-template-columns: repeat(3, 70px);
+                grid-gap: 10px;
+            }
+
+            .circle-btn {
+                width: 70px;
+                height: 70px;
+                font-size: 20px;
+            }
+
+            .zoom-controls {
+                gap: 1rem;
+            }
+
+            .zoom-btn {
+                width: 80px;
+                height: 50px;
+                font-size: 12px;
+            }
+        }
+
+        /* Animation de pulsation pour les boutons actifs */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 188, 212, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 188, 212, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 188, 212, 0); }
+        }
+
+        .circle-btn.active {
+            animation: pulse 1s infinite;
+        }
+  </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-video me-2"></i>SNRT Remote Production</a>
+            <div class="ms-auto">
+                <span class="text-light me-3">Bienvenue, {{ session.username }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Navigation Tabs -->
+    <div class="container mt-3">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('ptz_control') }}">
+                    <i class="fas fa-gamepad me-2"></i>PTZ Control
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link " href="{{ url_for('camera_settings') }}">
+                    <i class="fas fa-camera me-2"></i>Camera Settings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('studio_settings') }}">
+                    <i class="fas fa-cogs me-2"></i>Studio Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="main-content">
+        <div class="main-container">
+            <div class="controls-container">
+
+                <!-- Status et Contrôles de Connexion -->
+                <div class="status-box">
+                    <h3 class="section-title"><i class="fas fa-plug me-2"></i>Statut de Connexion</h3>
+                    <div class="status disconnected" id="status">Déconnecté ❌</div>
+                    <div class="connection-controls">
+                        <button class="btn" onclick="connectCamera()">
+                            <i class="fas fa-link me-2"></i>Connexion
+                        </button>
+                        <button class="btn disconnect-btn" onclick="disconnectCamera()">
+                            <i class="fas fa-unlink me-2"></i>Déconnexion
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contrôles PTZ -->
+                <div class="ptz-section">
+                    <h3 class="section-title"><i class="fas fa-arrows-alt me-2"></i>Contrôles Directionnels</h3>
+                    <div class="ptz-grid">
+                        <div class="circle-btn" onclick="sendCommand('upleft')" title="Haut-Gauche">↖</div>
+                        <div class="circle-btn" onclick="sendCommand('up')" title="Haut">↑</div>
+                        <div class="circle-btn" onclick="sendCommand('upright')" title="Haut-Droite">↗</div>
+                        <div class="circle-btn" onclick="sendCommand('left')" title="Gauche">←</div>
+                        <div class="circle-btn stop-btn" onclick="sendCommand('stop')" title="Arrêt">●</div>
+                        <div class="circle-btn" onclick="sendCommand('right')" title="Droite">→</div>
+                        <div class="circle-btn" onclick="sendCommand('downleft')" title="Bas-Gauche">↙</div>
+                        <div class="circle-btn" onclick="sendCommand('down')" title="Bas">↓</div>
+                        <div class="circle-btn" onclick="sendCommand('downright')" title="Bas-Droite">↘</div>
+                    </div>
+
+                    <!-- Zoom -->
+                    <h3 class="section-title"><i class="fas fa-search me-2"></i>Contrôles Zoom</h3>
+                    <div class="zoom-controls">
+                        <div class="zoom-btn" onclick="sendCommand('zoom in')" title="Zoom Avant">
+                            <i class="fas fa-search-plus me-1"></i>Zoom +
+                        </div>
+                        <div class="zoom-btn" onclick="sendCommand('zoom out')" title="Zoom Arrière">
+                            <i class="fas fa-search-minus me-1"></i>Zoom -
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Journal -->
+                <div id="log"></div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Script JS -->
+    <script>
+        let isConnected = false;
+
+        function updateStatus(connected, message = '') {
+            const statusElement = document.getElementById('status');
+            if (connected) {
+                statusElement.className = 'status connected';
+                statusElement.textContent = 'Connecté ✅';
+                isConnected = true;
+            } else {
+                statusElement.className = 'status disconnected';
+                statusElement.textContent = 'Déconnecté ❌';
+                isConnected = false;
+            }
+
+            if (message) {
+                addLogEntry(message, connected);
+            }
+        }
+
+        function addLogEntry(message, success = true) {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${success ? 'log-success' : 'log-error'}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+
+            // Limiter le nombre d'entrées dans le log
+            if (log.children.length > 100) {
+                log.removeChild(log.firstChild);
+            }
+        }
+
+        function connectCamera() {
+            // Animation du bouton pendant la connexion
+            const btn = event.target;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Connexion...';
+            btn.disabled = true;
+
+            fetch('/connect', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateStatus(data.success, data.message);
+                btn.innerHTML = '<i class="fas fa-link me-2"></i>Connexion';
+                btn.disabled = false;
+            })
+            .catch(error => {
+                updateStatus(false, 'Erreur de connexion: ' + error);
+                btn.innerHTML = '<i class="fas fa-link me-2"></i>Connexion';
+                btn.disabled = false;
+            });
+        }
+
+        function disconnectCamera() {
+            fetch('/disconnect', {method: 'POST'})
+                .then(response => response.json())
+                .then(data => {
+                    updateStatus(false, data.message);
+                })
+                .catch(error => {
+                    addLogEntry('Erreur de déconnexion: ' + error, false);
+                });
+        }
+
+        function sendCommand(command) {
+            if (!isConnected) {
+                addLogEntry('Vous devez d\'abord vous connecter à la caméra.', false);
+                return;
+            }
+
+            // Animation visuelle du bouton
+            const buttons = document.querySelectorAll('.circle-btn, .zoom-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(command)) {
+                    btn.classList.add('active');
+                    setTimeout(() => btn.classList.remove('active'), 300);
+                }
+            });
+
+            fetch(`/command/${command}`, {method: 'POST'})
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        addLogEntry(`Commande exécutée: ${command}`);
+                    } else {
+                        addLogEntry(`Échec de la commande: ${data.error}`, false);
+                    }
+                })
+                .catch(error => {
+                    addLogEntry(`Erreur: ${error}`, false);
+                });
+        }
+
+        // Support des raccourcis clavier
+        document.addEventListener('keydown', function(event) {
+            if (!isConnected) return;
+
+            const keyMap = {
+                'ArrowUp': 'up',
+                'ArrowDown': 'down',
+                'ArrowLeft': 'left',
+                'ArrowRight': 'right',
+                'Space': 'stop',
+                'Equal': 'zoom_in',
+                'Minus': 'zoom_out'
+            };
+
+            if (keyMap[event.code]) {
+                event.preventDefault();
+                sendCommand(keyMap[event.code]);
+            }
+        });
+
+        // Vérification de l'état au chargement
+        window.addEventListener('load', function() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    updateStatus(data.connected);
+                    addLogEntry('Interface chargée et prête.');
+                })
+                .catch(error => {
+                    addLogEntry('Impossible de vérifier l\'état de la connexion.', false);
+                });
+        });
+    </script>
+
+</body>
+</html>

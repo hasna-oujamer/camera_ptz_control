@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Settings - SNRT Remote Production</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border-color: #30363d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --accent: #00bcd4;
+            --success: #238636;
+            --danger: #da3633;
+            --warning: #d29922;
+            --camera-gradient: linear-gradient(135deg, #1a1f26, #252a32);
+            --camera-border-gradient: linear-gradient(135deg, var(--accent), #0097a7);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            color: var(--text-primary);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(13, 17, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs .nav-link {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-tabs .nav-link.active {
+            background: transparent;
+            color: var(--accent);
+            border-bottom: 3px solid var(--accent);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .content-area {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            min-height: 600px;
+        }
+
+        .section-title {
+            color: var(--accent);
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .studio-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .studio-item:hover {
+            background: rgba(0, 188, 212, 0.1);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .studio-item.active {
+            background: rgba(0, 188, 212, 0.2);
+            border-color: var(--accent);
+            box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+        }
+
+        .studio-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .studio-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #00acc1;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 0.75rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: var(--bg-tertiary);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 0.2rem rgba(0, 188, 212, 0.25);
+            color: var(--text-primary);
+        }
+
+        .camera-item {
+            background: var(--camera-gradient);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .camera-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--camera-border-gradient);
+            border-radius: 20px;
+            padding: 2px;
+            z-index: -1;
+
+        }
+
+        .camera-header {
+             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(0, 188, 212, 0.2);
+            position: relative;
+        }
+        .camera-header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: var(--camera-border-gradient);
+            border-radius: 2px;
+        }
+
+        .camera-name {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 188, 212, 0.3);
+        }
+
+        .camera-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.75rem;
+            border-radius: 6px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: rgba(35, 134, 54, 0.2);
+            border: 1px solid var(--success);
+            color: #81c784;
+        }
+
+        .alert-danger {
+            background: rgba(218, 54, 51, 0.2);
+            border: 1px solid var(--danger);
+            color: #e57373;
+        }
+
+        .no-selection {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-top: 3rem;
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 2rem;
+        }
+
+        .spinner-border {
+            color: var(--accent);
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .sidebar {
+                order: 1;
+            }
+
+            .content-area {
+                order: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-video me-2"></i>SNRT Remote Production</a>
+            <div class="ms-auto">
+                <span class="text-light me-3">Bienvenue, {{ session.username }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Navigation Tabs -->
+    <div class="container mt-3">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('ptz_control') }}">
+                    <i class="fas fa-gamepad me-2"></i>PTZ Control
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('camera_settings') }}">
+                    <i class="fas fa-camera me-2"></i>Camera Settings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('studio_settings') }}">
+                    <i class="fas fa-cogs me-2"></i>Studio Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="main-grid">
+            <!-- Sidebar - Liste des Studios -->
+            <div class="sidebar">
+                <h3 class="section-title"><i class="fas fa-building me-2"></i>Studios</h3>
+
+                <button class="btn btn-success w-100 mb-3" onclick="showAddStudioForm()">
+                    <i class="fas fa-plus me-2"></i>Nouveau Studio
+                </button>
+
+                <div class="studio-list" id="studioList">
+                    <div class="loading">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
+                        <p class="mt-2">Chargement des studios...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zone de contenu principal -->
+            <div class="content-area">
+                <div id="messageArea"></div>
+
+                <!-- Formulaire d'ajout de studio -->
+                <div id="studioForm" class="form-container">
+                    <h3 class="section-title">Nouveau Studio</h3>
+                    <form id="addStudioForm">
+                        <div class="form-group">
+                            <label for="studioName">Nom du Studio *</label>
+                            <input type="text" class="form-control" id="studioName" name="studioName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="studioLocation">Localisation</label>
+                            <input type="text" class="form-control" id="studioLocation" name="studioLocation" placeholder="Bâtiment principal">
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Créer Studio
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="hideAllForms()">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Formulaire d'ajout de caméra -->
+                <div id="cameraForm" class="form-container">
+                    <h3 class="section-title">Nouvelle Caméra</h3>
+                    <form id="addCameraForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="cameraName">Nom de la Caméra *</label>
+                                    <input type="text" class="form-control" id="cameraName" name="cameraName" placeholder="Camera 1" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="cameraModel">Modèle</label>
+                                    <input type="text" class="form-control" id="cameraModel" name="cameraModel" placeholder="Sony PTZ-1000">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="cameraIP">Adresse IP *</label>
+                                    <input type="text" class="form-control" id="cameraIP" name="cameraIP" placeholder="192.168.1.100" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="cameraBaudrate">Baudrate</label>
+                                    <select class="form-select" id="cameraBaudrate" name="cameraBaudrate">
+                                        <option value="9600" selected>9600</option>
+                                        <option value="38400">38400</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="cameraUsername">Nom d'utilisateur</label>
+                                    <input type="text" class="form-control" id="cameraUsername" name="cameraUsername" placeholder="admin">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="cameraPassword">Mot de passe</label>
+                                    <input type="password" class="form-control" id="cameraPassword" name="cameraPassword" placeholder="••••••••">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Ajouter Caméra
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="hideAllForms()">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Formulaire d'édition de caméra -->
+                <div id="editCameraForm" class="form-container">
+                    <h3 class="section-title">Modifier Caméra</h3>
+                    <form id="editCameraFormSubmit">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="editCameraName">Nom de la Caméra</label>
+                                    <input type="text" class="form-control" id="editCameraName" name="cameraName" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="editCameraModel">Modèle</label>
+                                    <input type="text" class="form-control" id="editCameraModel" name="cameraModel">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="editCameraIP">Adresse IP</label>
+                                    <input type="text" class="form-control" id="editCameraIP" name="cameraIP">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="editCameraPort">Port</label>
+                                    <input type="number" class="form-control" id="editCameraPort" name="cameraPort">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="editCameraBaudrate">Baudrate</label>
+                                    <select class="form-select" id="editCameraBaudrate" name="cameraBaudrate">
+                                        <option value="9600">9600</option>
+                                        <option value="38400">38400</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="editCameraUsername">Nom d'utilisateur</label>
+                                    <input type="text" class="form-control" id="editCameraUsername" name="cameraUsername">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="editCameraPassword">Mot de passe</label>
+                                    <input type="password" class="form-control" id="editCameraPassword" name="cameraPassword">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save me-2"></i>Sauvegarder
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="hideAllForms()">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Vue détaillée du studio -->
+                <div id="studioDetails" class="form-container active">
+                    <div class="no-selection">
+                        <i class="fas fa-building fa-3x mb-3 text-muted"></i>
+                        <p>Sélectionnez un studio pour voir ses détails et gérer ses caméras</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let studios = {};
+        let currentStudio = null;
+        let currentEditCamera = null;
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStudiosFromServer();
+        });
+
+        async function loadStudiosFromServer() {
+            try {
+                const response = await fetch('/api/studios');
+                if (response.ok) {
+                    studios = await response.json();
+                    updateStudioList();
+                } else {
+                    throw new Error('Erreur lors du chargement des studios');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage('Erreur lors du chargement des studios', 'error');
+                updateStudioList();
+            }
+        }
+
+        function updateStudioList() {
+            const studioList = document.getElementById('studioList');
+            studioList.innerHTML = '';
+
+            if (Object.keys(studios).length === 0) {
+                studioList.innerHTML = '<p class="text-muted text-center">Aucun studio configuré</p>';
+                return;
+            }
+
+            Object.keys(studios).forEach(studioName => {
+                const studio = studios[studioName];
+                const cameraCount = Object.keys(studio.cameras || {}).length;
+
+                const studioItem = document.createElement('div');
+                studioItem.className = 'studio-item';
+                studioItem.onclick = () => selectStudio(studioName);
+
+                studioItem.innerHTML = `
+                    <div class="studio-name">
+                        <i class="fas fa-building me-2"></i>${studioName}
+                    </div>
+                    <div class="studio-info">
+                        <i class="fas fa-video me-1"></i>${cameraCount} caméra(s) •
+                        <i class="fas fa-map-marker-alt me-1"></i>${studio.location || 'Non spécifiée'}
+                    </div>
+                `;
+
+                studioList.appendChild(studioItem);
+            });
+        }
+
+        function selectStudio(studioName) {
+            currentStudio = studioName;
+
+            document.querySelectorAll('.studio-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            event.target.closest('.studio-item').classList.add('active');
+            showStudioDetails(studioName);
+        }
+
+        function showStudioDetails(studioName) {
+            const studio = studios[studioName];
+            const detailsDiv = document.getElementById('studioDetails');
+
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                    <h3 class="section-title" style="margin: 0;"><i class="fas fa-building me-2"></i>${studioName}</h3>
+                    <div>
+                        <button class="btn btn-primary me-2" onclick="showAddCameraForm()">
+                            <i class="fas fa-plus me-2"></i>Nouvelle Caméra
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteStudio('${studioName}')">
+                            <i class="fas fa-trash me-2"></i>Supprimer Studio
+                        </button>
+                    </div>
+                </div>
+
+                <div class="detail-item" style="margin-bottom: 2rem;">
+                    <div class="detail-label">Informations du Studio</div>
+                    <div style="margin-top: 1rem;">
+                        <div class="mb-2"><strong><i class="fas fa-map-marker-alt me-2"></i>Localisation:</strong> ${studio.location || 'Non spécifiée'}</div>
+                    </div>
+                </div>
+
+                <h4 style="color: var(--accent); margin-bottom: 1rem;">
+                    <i class="fas fa-video me-2"></i>Caméras (${Object.keys(studio.cameras || {}).length})
+                </h4>
+                <div class="camera-list">
+            `;
+
+            if (Object.keys(studio.cameras || {}).length === 0) {
+                html += `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-video fa-3x mb-3"></i>
+                        <p>Aucune caméra configurée dans ce studio</p>
+                        <button class="btn btn-primary" onclick="showAddCameraForm()">
+                            <i class="fas fa-plus me-2"></i>Ajouter la première caméra
+                        </button>
+                    </div>
+                `;
+            } else {
+                Object.keys(studio.cameras || {}).forEach(cameraName => {
+                    const camera = studio.cameras[cameraName];
+                    html += `
+                        <div class="camera-item">
+                            <div class="camera-header">
+                                <div class="camera-name"><i class="fas fa-video me-2"></i>${cameraName}</div>
+                                <div>
+                                    <button class="btn btn-warning btn-sm me-2" onclick="editCamera('${studioName}', '${cameraName}')">
+                                        <i class="fas fa-edit me-1"></i>Modifier
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteCamera('${studioName}', '${cameraName}')">
+                                        <i class="fas fa-trash me-1"></i>Supprimer
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="camera-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Adresse IP</div>
+                                    <div class="detail-value"><i class="fas fa-network-wired me-1"></i>${camera.ip}</div>
+                                </div>
+                                <div class="detail-item">
+
+                                <div class="detail-item">
+                                    <div class="detail-label">Baudrate</div>
+                                    <div class="detail-value"><i class="fas fa-tachometer-alt me-1"></i>${camera.baudrate}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Modèle</div>
+                                    <div class="detail-value"><i class="fas fa-tag me-1"></i>${camera.model || 'Non spécifié'}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Utilisateur</div>
+                                    <div class="detail-value"><i class="fas fa-user me-1"></i>${camera.username || 'Non configuré'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            html += '</div>';
+            detailsDiv.innerHTML = html;
+            showForm('studioDetails');
+        }
+
+        function showAddStudioForm() {
+            hideAllForms();
+            document.getElementById('addStudioForm').reset();
+            showForm('studioForm');
+        }
+
+        function showAddCameraForm() {
+            if (!currentStudio) {
+                showMessage('Veuillez d\'abord sélectionner un studio', 'error');
+                return;
+            }
+            hideAllForms();
+            document.getElementById('addCameraForm').reset();
+            showForm('cameraForm');
+        }
+
+        function editCamera(studioName, cameraName) {
+            const camera = studios[studioName].cameras[cameraName];
+            currentEditCamera = { studio: studioName, camera: cameraName };
+
+            // Remplir le formulaire d'édition
+            document.getElementById('editCameraName').value = cameraName;
+            document.getElementById('editCameraModel').value = camera.model || '';
+            document.getElementById('editCameraIP').value = camera.ip || '';
+            document.getElementById('editCameraPort').value = camera.port || '';
+            document.getElementById('editCameraBaudrate').value = camera.baudrate || '9600';
+            document.getElementById('editCameraUsername').value = camera.username || '';
+            document.getElementById('editCameraPassword').value = camera.password || '';
+
+            hideAllForms();
+            showForm('editCameraForm');
+        }
+
+        function showForm(formId) {
+            hideAllForms();
+            document.getElementById(formId).classList.add('active');
+        }
+
+        function hideAllForms() {
+            document.querySelectorAll('.form-container').forEach(form => {
+                form.classList.remove('active');
+            });
+        }
+
+        function showMessage(message, type = 'success') {
+            const messageArea = document.getElementById('messageArea');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+
+            messageArea.innerHTML = `
+                <div class="alert ${alertClass}">
+                    <i class="${icon} me-2"></i>${message}
+                </div>
+            `;
+
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        // Gestion des formulaires
+        document.getElementById('addStudioForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            const studioData = {
+                name: formData.get('studioName').trim(),
+                location: formData.get('studioLocation').trim()
+            };
+
+            if (!studioData.name) {
+                showMessage('Le nom du studio est requis', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/studios', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(studioData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    await loadStudiosFromServer(); // Recharger la liste
+                    hideAllForms();
+                    showMessage(result.message);
+                } else {
+                    showMessage(result.error || 'Erreur lors de la création du studio', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage('Erreur de connexion au serveur', 'error');
+            }
+        });
+
+        document.getElementById('addCameraForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            if (!currentStudio) {
+                showMessage('Aucun studio sélectionné', 'error');
+                return;
+            }
+
+            const cameraData = {
+                name: formData.get('cameraName').trim(),
+                ip: formData.get('cameraIP').trim(),
+                port: '1', // Port fixe par défaut
+                baudrate: formData.get('cameraBaudrate'),
+                model: formData.get('cameraModel').trim(),
+                username: formData.get('cameraUsername').trim(),
+                password: formData.get('cameraPassword')
+            };
+
+            if (!cameraData.name || !cameraData.ip) {
+                showMessage('Le nom et l\'adresse IP de la caméra sont requis', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/studios/${encodeURIComponent(currentStudio)}/cameras`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(cameraData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    await loadStudiosFromServer(); // Recharger la liste
+                    showStudioDetails(currentStudio); // Rafraîchir les détails
+                    showMessage(result.message);
+                } else {
+                    showMessage(result.error || 'Erreur lors de l\'ajout de la caméra', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage('Erreur de connexion au serveur', 'error');
+            }
+        });
+
+        document.getElementById('editCameraFormSubmit').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+
+            if (!currentEditCamera) {
+                showMessage('Erreur: aucune caméra sélectionnée pour modification', 'error');
+                return;
+            }
+
+            const cameraData = {
+                ip: formData.get('cameraIP').trim(),
+                port: formData.get('cameraPort'),
+                baudrate: formData.get('cameraBaudrate'),
+                model: formData.get('cameraModel').trim(),
+                username: formData.get('cameraUsername').trim(),
+                password: formData.get('cameraPassword')
+            };
+
+            try {
+                const response = await fetch(`/api/studios/${encodeURIComponent(currentEditCamera.studio)}/cameras/${encodeURIComponent(currentEditCamera.camera)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(cameraData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    await loadStudiosFromServer(); // Recharger la liste
+                    showStudioDetails(currentEditCamera.studio); // Rafraîchir les détails
+                    currentEditCamera = null;
+                    showMessage(result.message);
+                } else {
+                    showMessage(result.error || 'Erreur lors de la modification de la caméra', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage('Erreur de connexion au serveur', 'error');
+            }
+        });
+
+        async function deleteStudio(studioName) {
+            const cameraCount = Object.keys(studios[studioName].cameras || {}).length;
+            const confirmMessage = cameraCount > 0
+                ? `Êtes-vous sûr de vouloir supprimer le studio "${studioName}" et ses ${cameraCount} caméra(s) ?`
+                : `Êtes-vous sûr de vouloir supprimer le studio "${studioName}" ?`;
+
+            if (!confirm(confirmMessage)) return;
+
+            try {
+                const response = await fetch(`/api/studios/${encodeURIComponent(studioName)}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    await loadStudiosFromServer(); // Recharger la liste
+                    hideAllForms();
+                    currentStudio = null;
+                    document.getElementById('studioDetails').innerHTML = `
+                        <div class="no-selection">
+                            <i class="fas fa-building fa-3x mb-3 text-muted"></i>
+                            <p>Sélectionnez un studio pour voir ses détails et gérer ses caméras</p>
+                        </div>
+                    `;
+                    showMessage(result.message);
+                } else {
+                    showMessage(result.error || 'Erreur lors de la suppression du studio', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage('Erreur de connexion au serveur', 'error');
+            }
+        }
+
+        async function deleteCamera(studioName, cameraName) {
+            if (!confirm(`Êtes-vous sûr de vouloir supprimer la caméra "${cameraName}" ?`)) return;
+
+            try {
+                const response = await fetch(`/api/studios/${encodeURIComponent(studioName)}/cameras/${encodeURIComponent(cameraName)}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    await loadStudiosFromServer(); // Recharger la liste
+                    showStudioDetails(studioName); // Rafraîchir les détails
+                    showMessage(result.message);
+                } else {
+                    showMessage(result.error || 'Erreur lors de la suppression de la caméra', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showMessage('Erreur de connexion au serveur', 'error');
+            }
+        }
+    </script>
+
+</body>
+</html>
